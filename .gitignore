@@ -6,3 +6,7 @@ transient/*
 .#*
 
 *~
+/config.el
+/eshell/
+/history
+/projects

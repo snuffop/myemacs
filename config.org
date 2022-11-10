@@ -4,7 +4,7 @@
 #+OPTIONS: num:nil ^:{}
 
 * Default and initial settings
-
+** Startup Emacs tweaks
 #+begin_src emacs-lisp
    (setq inhibit-startup-message t)
    (scroll-bar-mode -1)
@@ -13,11 +13,8 @@
    (menu-bar-mode -1)
    (set-fringe-mode 10)
    (setq visible-bell t)
-
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
 #+end_src
-* Packages (use-package) & quelpa
+** Package system
 
 #+begin_src emacs-lisp
   (require 'package)
@@ -35,10 +32,9 @@
   (setq use-package-always-ensure t)
 #+end_src
 
-* Garbage Collection
+** Garbage Collection
 
 #+begin_src emacs-lisp
-
   (use-package gcmh
     :config
     (gcmh-mode 1))
@@ -54,7 +50,7 @@
 		       gcs-done)))
 #+end_src
 
-* Native Compile
+** Native Compile
 #+begin_src emacs-lisp
   (if (boundp 'comp-deferred-compilation)
       (setq comp-deferred-compilation nil)
@@ -67,16 +63,16 @@
 Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the nerd-fonts repository.  Installed from the AUR, it does =NOT= include all variations of the font (such as italics).  You can download the italics Source Code Pro font from the nerd-fonts GitHub though.
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil
-    :font "Source Code Pro"
-    :height 150
+    :font "FiraCode Nerd Font"
+    :height 130
     :weight 'medium)
   (set-face-attribute 'variable-pitch nil
     :font "Ubuntu Nerd Font"
     :height 170
     :weight 'medium)
   (set-face-attribute 'fixed-pitch nil
-    :font "Source Code Pro"
-    :height 150
+    :font "FiraCode Nerd Font"
+    :height 130
     :weight 'medium)
   ;; Makes commented text and keywords italics.
   ;; This is working in emacsclient but not emacs.
@@ -105,20 +101,23 @@ Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the
     :config
     (load-theme 'dracula t))
 #+end_src
-
-** Modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :config
     (setq doom-modeline-height 30)
     (setq doom-modeline-mu4e t)
-    (setq doom-modeline-gnus nil)
-    (doom-modeline-mode 1))
+    (setq doom-modeline-gnus nil))
+  (doom-modeline-mode 1)
 #+end_src
 
 #+RESULTS:
 : t
 
+** Line Numbers
+#+begin_src emacs-lisp
+(global-display-line-numbers-mode 1)
+(global-visual-line-mode t)
+#+end_src
 * Keybindings & Evil
 ** EVIL
 #+begin_src emacs-lisp
@@ -141,7 +140,6 @@ Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the
   :custom
   (evil-collection-outline-bind-tab-p nil)
   :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
   (evil-collection-init))
 #+end_src
 
@@ -149,11 +147,9 @@ Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the
 #+begin_src emacs-lisp
 (use-package evil-tutor)
 #+end_src
+** Set global key to quit with escape key
 #+begin_src emacs-lisp
-(use-package general
-  :config
-  (general-evil-setup t))
-
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 #+end_src
 ** Which-key
 
@@ -174,108 +170,9 @@ Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the
 	  which-key-show-early-on-C-h t
 	  which-key-separator " → " ))
   (which-key-mode)
+
+  (define-key ctl-x-map  "p" (cons "project" project-prefix-map))
 #+end_src
-
-#+RESULTS:
-: t
-
-** Key Maps
-*** / override
-#+begin_src emacs-lisp
-  (nvmap :keymaps 'override :prefix "SPC"
-       "SPC"   '(execute-extended-command :which-key "M-x")
-         "b"   '(:ignore :which-key "buffer"))
-#+end_src
-
-#+RESULTS:
-
-*** B
-
-#+begin_src emacs-lisp
-  (nvmap :keymaps 'override :prefix "SPC" 
-	 "b b"   '(ibuffer :which-key "Ibuffer")
-	 "b c"   '(clone-indirect-buffer-other-window :which-key "Clone indirect buffer other window")
-	 "b k"   '(kill-current-buffer :which-key "Kill current buffer")
-	 "b n"   '(next-buffer :which-key "Next buffer")
-	 "b p"   '(previous-buffer :which-key "Previous buffer")
-	 "b B"   '(ibuffer-list-buffers :which-key "Ibuffer list buffers")
-	 "b K"   '(kill-buffer :which-key "Kill buffer"))
-#+end_src
-
-#+RESULTS:
-
-#+end_src
-
-*** D
-
-#+begin_src emacs-lisp
-  (nvmap :states '(normal visual) :keymaps 'override :prefix "SPC"
-		 "d d" '(dired :which-key "Open dired")
-		 "d j" '(dired-jump :which-key "Dired jump to current")
-		 "d p" '(peep-dired :which-key "Peep-dired"))
-#+end_src
-
-*** E
-
-**** Evil Define Key
-
-#+begin_src emacs-lisp
-  ;;(define-key dired-mode-map (kbd "M-p") 'peep-dired)
-  (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
-  (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file) ; use dired-find-file instead if not using dired-open package
-  (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
-  (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
-#+end_src
-
-#+RESULTS:
-
-**** Evaluate Elisp
-I took this from DT but I need to move to localleader binding
-#+begin_src emacs-lisp
-  (nvmap :states '(normal visual) :keymaps 'override :prefix "SPC"
-	 "e b"   '(eval-buffer :which-key "Eval elisp in buffer")
-	 "e d"   '(eval-defun :which-key "Eval defun")
-	 "e e"   '(eval-expression :which-key "Eval elisp expression")
-	 "e l"   '(eval-last-sexp :which-key "Eval last sexression")
-	 "e r"   '(eval-region :which-key "Eval region"))
-#+end_src
-
-*** F
-
-#+begin_src emacs-lisp
-
-  (nvmap :states '(normal visual) :keymaps 'override :prefix "SPC" :which-key "Files"
-	 "."     '(find-file :which-key "Find file")
-	 "f f"   '(find-file :which-key "Find file")
-	 "f r"   '(counsel-recentf :which-key "Recent files")
-	 "f s"   '(save-buffer :which-key "Save file")
-	 "f u"   '(sudo-edit-find-file :which-key "Sudo find file")
-	 "f y"   '(dt/show-and-copy-buffer-path :which-key "Yank file path")
-	 "f C"   '(copy-file :which-key "Copy file")
-	 "f D"   '(delete-file :which-key "Delete file")
-	 "f R"   '(rename-file :which-key "Rename file")
-	 "f S"   '(write-file :which-key "Save file as...")
-	 "f U"   '(sudo-edit :which-key "Sudo edit file"))
-
-#+end_src
-
-#+RESULTS:
-
-*** H
-#+begin_src emacs-lisp
-(nvmap :keymaps 'override :prefix "SPC"
-       "h r r" '((lambda () (interactive) (load-file "~/.emacs.d/init.el")) :which-key "Reload emacs config"))
-#+end_src
-
-#+RESULTS:
-
-*** T
-#+begin_src emacs-lisp
-  (nvmap :keymaps 'override :prefix "SPC"
-       "t t"   '(toggle-truncate-lines :which-key "Toggle truncate lines"))
-#+end_src
-
-#+RESULTS:
 
 * Completion
 ** Vertico
@@ -482,7 +379,7 @@ I took this from DT but I need to move to localleader binding
   (use-package all-the-icons)
 #+end_src
 
-** DASHBOARD
+** Dashboard
 Emacs Dashboard is an extensible startup screen showing you recent files, bookmarks, agenda items and an Emacs banner.
 
 *** Configuring Dashboard
@@ -538,3 +435,10 @@ This setting ensures that emacsclient always opens on *dashboard* rather than *s
   (use-package sudo-edit)
 #+end_src
 
+
+** Magit
+A git client for Emacs.  Often cited as a killer feature for Emacs.
+#+begin_src emacs-lisp
+;; use maggit on git bare repos like dotfiles repos, don't forget to change `bare-git-dir' and `bare-work-tree' to your needs
+(use-package magit)
+ #+end_src
