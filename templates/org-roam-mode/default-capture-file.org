@@ -1,0 +1,7 @@
+#+TITLE: ${1:`(s-titleized-words (replace-regexp-in-string "^[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9]-" "" (file-name-base (or buffer-file-name "new buffer"))))`}
+#+AUTHOR:%n
+#+DATE:%u
+#+STARTUP: overview
+#+SETUPFILE: ~/Nextcloud/Notes/org/notes-style.org
+
+%?
