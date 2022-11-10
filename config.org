@@ -64,8 +64,38 @@
 
 * UI
 ** Fonts
+Defining our fonts.  Right now I'm using Source Code Pro (SauceCodePro) from the nerd-fonts repository.  Installed from the AUR, it does =NOT= include all variations of the font (such as italics).  You can download the italics Source Code Pro font from the nerd-fonts GitHub though.
 #+begin_src emacs-lisp
+  (set-face-attribute 'default nil
+    :font "Source Code Pro"
+    :height 150
+    :weight 'medium)
+  (set-face-attribute 'variable-pitch nil
+    :font "Ubuntu Nerd Font"
+    :height 170
+    :weight 'medium)
+  (set-face-attribute 'fixed-pitch nil
+    :font "Source Code Pro"
+    :height 150
+    :weight 'medium)
+  ;; Makes commented text and keywords italics.
+  ;; This is working in emacsclient but not emacs.
+  ;; Your font must have an italic face available.
+  (set-face-attribute 'font-lock-comment-face nil
+    :slant 'italic)
+  (set-face-attribute 'font-lock-keyword-face nil
+    :slant 'italic)
+  ;; Uncomment the following line if line spacing needs adjusting.
+  (setq-default line-spacing 0.12)
+  ;; Needed if using emacsclient. Otherwise, your fonts will be smaller than expected.
   (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 130)
+  ;; changes certain keywords to symbols, such as lamda!
+  (setq global-prettify-symbols-mode t)
+#+end_src
+
+#+RESULTS:
+: t
+
 #+end_src
 
 ** Theme
@@ -75,6 +105,19 @@
     :config
     (load-theme 'dracula t))
 #+end_src
+
+** Modeline
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :config
+    (setq doom-modeline-height 30)
+    (setq doom-modeline-mu4e t)
+    (setq doom-modeline-gnus nil)
+    (doom-modeline-mode 1))
+#+end_src
+
+#+RESULTS:
+: t
 
 * Keybindings & Evil
 ** EVIL
@@ -115,36 +158,52 @@
 ** Which-key
 
 #+begin_src emacs-lisp
-(use-package which-key
-  :init
-  (setq which-key-side-window-location 'bottom
-        which-key-sort-order #'which-key-key-order-alpha
-        which-key-sort-uppercase-first nil
-        which-key-add-column-padding 1
-        which-key-max-display-columns nil
-        which-key-min-display-lines 6
-        which-key-side-window-slot -10
-        which-key-side-window-max-height 0.25
-        which-key-idle-delay 0.8
-        which-key-max-description-length 25
-        which-key-allow-imprecise-window-fit t
-        which-key-separator " → " ))
-(which-key-mode)
+  (use-package which-key
+    :init
+    (setq which-key-side-window-location 'bottom
+	  which-key-sort-order #'which-key-key-order-alpha
+	  which-key-sort-uppercase-first nil
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 6
+	  which-key-side-window-slot -10
+	  which-key-side-window-max-height 0.25
+	  which-key-idle-delay 0.8
+	  which-key-max-description-length 25
+	  which-key-allow-imprecise-window-fit nil
+	  which-key-show-early-on-C-h t
+	  which-key-separator " → " ))
+  (which-key-mode)
 #+end_src
 
+#+RESULTS:
+: t
+
 ** Key Maps
+*** / override
+#+begin_src emacs-lisp
+  (nvmap :keymaps 'override :prefix "SPC"
+       "SPC"   '(execute-extended-command :which-key "M-x")
+         "b"   '(:ignore :which-key "buffer"))
+#+end_src
+
+#+RESULTS:
 
 *** B
 
 #+begin_src emacs-lisp
-(nvmap :prefix "SPC"
-       "b b"   '(ibuffer :which-key "Ibuffer")
-       "b c"   '(clone-indirect-buffer-other-window :which-key "Clone indirect buffer other window")
-       "b k"   '(kill-current-buffer :which-key "Kill current buffer")
-       "b n"   '(next-buffer :which-key "Next buffer")
-       "b p"   '(previous-buffer :which-key "Previous buffer")
-       "b B"   '(ibuffer-list-buffers :which-key "Ibuffer list buffers")
-       "b K"   '(kill-buffer :which-key "Kill buffer"))
+  (nvmap :keymaps 'override :prefix "SPC" 
+	 "b b"   '(ibuffer :which-key "Ibuffer")
+	 "b c"   '(clone-indirect-buffer-other-window :which-key "Clone indirect buffer other window")
+	 "b k"   '(kill-current-buffer :which-key "Kill current buffer")
+	 "b n"   '(next-buffer :which-key "Next buffer")
+	 "b p"   '(previous-buffer :which-key "Previous buffer")
+	 "b B"   '(ibuffer-list-buffers :which-key "Ibuffer list buffers")
+	 "b K"   '(kill-buffer :which-key "Kill buffer"))
+#+end_src
+
+#+RESULTS:
+
 #+end_src
 
 *** D
@@ -165,11 +224,13 @@
   (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
   (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file) ; use dired-find-file instead if not using dired-open package
   (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
-  (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file))
+  (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 #+end_src
 
-**** Evaluate Elisp
+#+RESULTS:
 
+**** Evaluate Elisp
+I took this from DT but I need to move to localleader binding
 #+begin_src emacs-lisp
   (nvmap :states '(normal visual) :keymaps 'override :prefix "SPC"
 	 "e b"   '(eval-buffer :which-key "Eval elisp in buffer")
@@ -179,7 +240,42 @@
 	 "e r"   '(eval-region :which-key "Eval region"))
 #+end_src
 
+*** F
 
+#+begin_src emacs-lisp
+
+  (nvmap :states '(normal visual) :keymaps 'override :prefix "SPC" :which-key "Files"
+	 "."     '(find-file :which-key "Find file")
+	 "f f"   '(find-file :which-key "Find file")
+	 "f r"   '(counsel-recentf :which-key "Recent files")
+	 "f s"   '(save-buffer :which-key "Save file")
+	 "f u"   '(sudo-edit-find-file :which-key "Sudo find file")
+	 "f y"   '(dt/show-and-copy-buffer-path :which-key "Yank file path")
+	 "f C"   '(copy-file :which-key "Copy file")
+	 "f D"   '(delete-file :which-key "Delete file")
+	 "f R"   '(rename-file :which-key "Rename file")
+	 "f S"   '(write-file :which-key "Save file as...")
+	 "f U"   '(sudo-edit :which-key "Sudo edit file"))
+
+#+end_src
+
+#+RESULTS:
+
+*** H
+#+begin_src emacs-lisp
+(nvmap :keymaps 'override :prefix "SPC"
+       "h r r" '((lambda () (interactive) (load-file "~/.emacs.d/init.el")) :which-key "Reload emacs config"))
+#+end_src
+
+#+RESULTS:
+
+*** T
+#+begin_src emacs-lisp
+  (nvmap :keymaps 'override :prefix "SPC"
+       "t t"   '(toggle-truncate-lines :which-key "Toggle truncate lines"))
+#+end_src
+
+#+RESULTS:
 
 * Completion
 ** Vertico
@@ -386,13 +482,6 @@
   (use-package all-the-icons)
 #+end_src
 
-** Dired
-#+begin_src emacs-lisp
-(use-package all-the-icons-dired)
-(use-package dired-open)
-(use-package peep-dired)
-#+end_src
-
 ** DASHBOARD
 Emacs Dashboard is an extensible startup screen showing you recent files, bookmarks, agenda items and an Emacs banner.
 
@@ -423,3 +512,29 @@ This setting ensures that emacsclient always opens on *dashboard* rather than *s
 #+begin_src emacs-lisp
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+end_src
+** Dired
+#+begin_src emacs-lisp
+
+  (use-package all-the-icons-dired)
+  (use-package dired-open)
+  (use-package peep-dired)
+
+  (add-hook 'peep-dired-hook 'evil-normalize-keymaps)
+  ;; Get file icons in dired
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+  ;; With dired-open plugin, you can launch external programs for certain extensions
+  ;; For example, I set all .png files to open in 'sxiv' and all .mp4 files to open in 'mpv'
+  (setq dired-open-extensions '(("gif" . "sxiv")
+				("jpg" . "sxiv")
+				("png" . "sxiv")
+				("mkv" . "mpv")
+				("mp4" . "mpv")))
+#+end_src
+
+#+RESULTS:
+
+** Files
+#+begin_src emacs-lisp
+  (use-package sudo-edit)
+#+end_src
+
