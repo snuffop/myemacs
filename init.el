@@ -1,16 +1,18 @@
-;;; init.el --- Initial file
+;;; $doomdir/config.el --- Marty Buchaus' Emacs Config File -*- lexical-binding: t; -*-
+;;;
+;;; Commentary:
+;;;
+;;; Code:
 
-(org-babel-load-file
- (expand-file-name
-  "config.org"
-  user-emacs-directory))
+(load (expand-file-name "myconfig.el" user-emacs-directory))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(delve websocket consult-org-roam yasnippet zoxide helpful wakatime-mode paperless cape corfu emacsql-sqlite3 org-roam doct org-bullets magit doom-modeline peep-dired dired-open all-the-icons-dired dashboard all-the-icons which-key vertico quelpa-use-package outshine orderless marginalia general gcmh evil-tutor evil-collection embark-consult dracula-theme)))
+   '(workgroups dired-x dirvish delve org-roam-ui systemd zoxide yasnippet which-key websocket wakatime-mode vertico sudo-edit quelpa-use-package peep-dired paperless outshine org-bullets orderless marginalia magit-todos helpful gcmh forge evil-tutor evil-collection embark-consult emacsql-sqlite3 eglot doom-themes doom-modeline doct dired-open dashboard corfu consult-org-roam cape ansible all-the-icons-dired))
+ '(safe-local-variable-values '((pyvenv-activate . ~/Source/Joyent/EngOps/\.venv))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
