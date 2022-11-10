@@ -2,29 +2,7 @@
 
 ;;; Default and initial settings
 ;;;; Server
-(server-start)
-;;;; Startup Emacs tweaks
-(setq inhibit-startup-message t)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(menu-bar-mode -1)
-(set-fringe-mode 10)
-(setq visible-bell t)
-
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-;;;; Package system
-
-(require 'package)
-
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org"   . "https://orgmode.org/elpa")
-                         ("elpa"  . "https://elpa.gnu.org/packages/")))
-
-(package-initialize)
-(unless package-archive-contents
-  (package-install 'use-package))
+(server-start)))
 
 (require 'use-package)
 
@@ -153,18 +131,6 @@
 
 ;;;;  Evil Tutor
 (use-package evil-tutor)
-;;; Global Key Bindings
-
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-;; ctl-x
-(define-key ctl-x-map  "p" (cons "project" project-prefix-map))
-(define-key ctl-x-map  "r" (cons "register" ctl-x-r-map))
-(define-key ctl-x-map  "R" '("Reload emacs Config" . (lambda () (interactive) (load-file "~/.emacs.d/init.el"))))
-
-(define-key project-prefix-map "/" '("Project Search RH" . consult-ripgrep))
-
-(define-key evil-normal-state-map "gz" '("zoxide jump" . zoxide-find-file))
-(define-key help-map "h"    #'helpful-at-point)
 ;;; Which-key
 
 (use-package which-key
@@ -184,7 +150,60 @@
         which-key-allow-imprecise-window-fit nil
         which-key-show-early-on-C-h t
         which-key-separator " → " ))
+;;; General-el
+;;;; Package 
+(use-package general
+  :config
+  (general-evil-setup t))
 
+;;;; bindings
+
+(nvmap :keymaps 'override :prefix "SPC"
+       "SPC"   '(execute-extended-command :which-key "M-x")
+       "h r r" '((lambda () (interactive) (load-file "~/.emacs.d/init.el")) :which-key "Reload emacs config")
+       "t t"   '(toggle-truncate-lines :which-key "Toggle truncate lines"))  
+
+(nvmap :keymaps 'override :prefix "SPC"
+  ;; B
+       "b b"   '(consult-buffer :which-key "Consult Buffer")
+       "b B"   '(ibuffer :which-key "Ibuffer")
+       "b c"   '(clone-indirect-buffer-other-window :which-key "Clone indirect buffer other window")
+       "b k"   '(kill-current-buffer :which-key "Kill current buffer")
+       "b n"   '(next-buffer :which-key "Next buffer")
+       "b p"   '(previous-buffer :which-key "Previous buffer")
+       "b B"   '(ibuffer-list-buffers :which-key "Ibuffer list buffers")
+       "b K"   '(kill-buffer :which-key "Kill buffer")
+;; m
+       "m *"   '(org-ctrl-c-star :which-key "Org-ctrl-c-star")
+       "m +"   '(org-ctrl-c-minus :which-key "Org-ctrl-c-minus")
+       "m ."   '(counsel-org-goto :which-key "Counsel org goto")
+       "m e"   '(org-export-dispatch :which-key "Org export dispatch")
+       "m f"   '(org-footnote-new :which-key "Org footnote new")
+       "m h"   '(org-toggle-heading :which-key "Org toggle heading")
+       "m i"   '(org-toggle-item :which-key "Org toggle item")
+       "m n"   '(org-store-link :which-key "Org store link")
+       "m o"   '(org-set-property :which-key "Org set property")
+       "m t"   '(org-todo :which-key "Org todo")
+       "m x"   '(org-toggle-checkbox :which-key "Org toggle checkbox")
+       "m B"   '(org-babel-tangle :which-key "Org babel tangle")
+       "m I"   '(org-toggle-inline-images :which-key "Org toggle inline imager")
+       "m T"   '(org-todo-list :which-key "Org todo list")
+       "o a"   '(org-agenda :which-key "Org agenda")
+       )
+
+
+;;; Global Key Bindings
+
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+;; ctl-x
+(define-key ctl-x-map  "p" (cons "project" project-prefix-map))
+(define-key ctl-x-map  "r" (cons "register" ctl-x-r-map))
+(define-key ctl-x-map  "R" '("Reload emacs Config" . (lambda () (interactive) (load-file "~/.emacs.d/init.el"))))
+
+(define-key project-prefix-map "/" '("Project Search RH" . consult-ripgrep))
+
+(define-key evil-normal-state-map "gz" '("zoxide jump" . zoxide-find-file))
+(define-key help-map "h"    #'helpful-at-point)
 
 ;;; Completion
 ;;;; Vertico
@@ -548,7 +567,6 @@
 ;;;; Helpful
 (use-package helpful)
 
-
 ;;;; Magit
 (use-package magit)
 ;;;;; forge
@@ -567,12 +585,11 @@
 ;;;; Outshine
 
 (use-package outshine
-  :hook (prog-mode . outshine-mode)
+  :hook ((prog-mode . outshine-minor-mode)
+	 (outline-minor-mode . outshine-mode))
   :bind (:map emacs-lisp-mode-map
               ("TAB" . #'outshine-cycle))
   :config
-  (add-hook 'prog-mode-hook #'outline-minor-mode)
-  (add-hook 'outline-minor-mode-hook #'outshine-mode)
   (defvar outline-minor-mode-prefix "\M-#"))
 
 ;;;; Paperless
@@ -583,8 +600,8 @@
   (setq paperless-capture-directory "~/Nextcloud/Documents/INBOX")
   (setq paperless-root-directory "~/Nextcloud/Documents"))
 
-
 ;;;; Systemd
+
 (use-package systemd
   :commands (systemd-mode)
   :mode "\\.service\\'")
@@ -601,12 +618,6 @@
   :config
   (cond (IS-MAC (setq wakatime-cli-path "/usr/local/bin/wakatime-cli"))
         (IS-LINUX (setq wakatime-cli-path "/usr/bin/wakatime"))))
-
-;;;; Workgroups
-(use-package workgroups)
-(setq wg-prefix-key (kbd "C-c w"))
-(workgroups-mode 1)
-(wg-load "~/.config/myemacs/workgroups")
 
 ;;;; Zoxide
 (use-package zoxide)
@@ -631,7 +642,6 @@
   (add-hook 'org-mode-hook 'org-indent-mode)
 
 ;;;;; Pre and Default
-
 
 (setq org-directory (expand-file-name "~/Nextcloud/Notes/org/"))
 (setq org-contacts-files (expand-file-name "contacts.org" org-directory))
